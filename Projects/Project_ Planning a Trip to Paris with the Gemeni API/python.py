@@ -1,3 +1,6 @@
+#This is a tour guide of Paris. It tells about everything you need to explore Paris
+
+
 # Start your code here!
 import os
 from dotenv import load_dotenv
