@@ -22,45 +22,61 @@ client = OpenAI(
 )
 
 # Start coding here
+
+
+def bot(conversation, user_question):
+
+    user_queries = []
+
+    user_queries.append(user_question)
+
+    for q in user_queries:
+        # print("User: ", q)
+        user_dict = {"role": "user", "content": q}
+        conversation.append(user_dict)
+
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                temperature=0.0,
+                # max_tokens=100,
+                messages=conversation,
+            )
+        except APIStatusError as error:
+            print(
+                f"API request failed ({error.status_code}): "
+                f"{error.message or 'Unknown API error'}"
+            )
+            break
+
+        answer = response.choices[0].message.content
+        assistant_dict = {"role": "assistant", "content": answer}
+        conversation.append(assistant_dict)
+        print("Assistant: ", answer, "\n")
+
+
 conversation = [
-    {"role": "system", "content": """You are a Parision expert, delivering valuable insights into the cities iconic landmarks and hidden treasures.
+    {
+        "role": "system",
+        "content": """You are a Parision expert, delivering valuable insights into the cities iconic landmarks and hidden treasures.
 - Answer in the first sentence, in 2 to 3 short sentences (under 60 words).
 - Give accurate, practical facts and one useful tip.
 - Give distances in miles.
 - If you are unsure of a fact, say so. Never invent facts.
 - Answer only Paris travel questions. Politely decline anything else.
-- Tone: warm, friendly, and confident, like a local guide. Use plain English."""},
+- Tone: warm, friendly, and confident, like a local guide. Use plain English.""",
+    },
     {"role": "user", "content": "Where is Eiffel Tower?"},
-    {"role": "assistant", "content": """Salam, Hope you are doing well. Eiffel Tower is located in Paris which is the capital of France. If you need any type of Tour guide about Paris, feel free to ask"""}
-    
+    {
+        "role": "assistant",
+        "content": """Salam, Hope you are doing well. Eiffel Tower is located in Paris which is the capital of France. If you need any type of Tour guide about Paris, feel free to ask""",
+    },
 ]
 
-user_queries = [
-    "How far away is the Louvre from the Eiffel Tower (in miles) if you are driving?",
-    "Where is the Arc de Triomphe?",
-    "What are the must-see artworks at the Louvre Museum?",
-]
+while True:
+    user_queries = input("User: ")
 
-for q in user_queries:
-    print("User: ", q)
-    user_dict = {"role": "user", "content": q}
-    conversation.append(user_dict)
+    bot(conversation, user_queries)
 
-    try:
-        response = client.chat.completions.create(
-            model=model,
-            temperature=0.0,
-            # max_tokens=100,
-            messages=conversation,
-        )
-    except APIStatusError as error:
-        print(
-            f"API request failed ({error.status_code}): "
-            f"{error.message or 'Unknown API error'}"
-        )
+    if user_queries.lower().strip() == "no":
         break
-
-    answer = response.choices[0].message.content
-    assistant_dict = {"role": "assistant", "content": answer}
-    conversation.append(assistant_dict)
-    print("Assistant: ", answer, "\n")
